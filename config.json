@@ -1,0 +1,6 @@
+{
+  "api_key": "AIzaSyDl1kCTrO4heRfOZDI5UQ6qNm-oFRPWIto",
+  "regions": ["IN", "US", "BR", "ID", "MX"],
+  "orders": ["viewCount", "relevance", "date"],
+  "categories": ["1", "10", "17", "20", "24", "28"]
+}
