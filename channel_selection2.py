@@ -41,4 +41,5 @@ ch["cluster"] = kmeans.labels_
 
 samples = ch.groupby("cluster").apply(lambda x: x.sample(min(len(x), 20), random_state=1)).reset_index(drop=True)
 samples.to_csv("channels.csv", index=False)
+samples.to_json("channels.json", orient="records", indent=2)
 print("Saved", len(samples), "sampled channels.")

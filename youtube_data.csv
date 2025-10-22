@@ -1,42 +1,21 @@
 video_id,title,views,comment_author,comment_text,comment_likes
-VldX34mM95o,How a Moonshot Led to Google DeepMind's Veo 3,765,@arpadkovacs2116,"Thanks, everyone! I reran the same prompt and starting image this morning using VEO 3.1, just like I did with VEO 3 last night — and the improvement was huge. Even the extended portion turned out great.",1
-VldX34mM95o,How a Moonshot Led to Google DeepMind's Veo 3,765,@sarthajvaliya803,Hi there,0
-gKP27LJatkc,Curing primitive obsession with better types 🪄,1402,@siddharth_shankar91,Thanks for the tip👍,0
-gKP27LJatkc,Curing primitive obsession with better types 🪄,1402,@thatonehenward4275,google hat are we doing,0
-gKP27LJatkc,Curing primitive obsession with better types 🪄,1402,@TravisLee33,👍 🪄 👍,0
-61koDfqjAfQ,Only knowing PHP? 🟥 or 🟩 ?,7393,@farzad7796,I was able to make a good life for myself just by knowing PHP. I am grateful to PHP.,4
-61koDfqjAfQ,Only knowing PHP? 🟥 or 🟩 ?,7393,@heyfiroz,"Thank God, I'm learning more and more language But PHP is my first one",2
-61koDfqjAfQ,Only knowing PHP? 🟥 or 🟩 ?,7393,@Dilakv,Know PHP is not a red flag. Don't want to learn another language is the real red flag.,1
-61koDfqjAfQ,Only knowing PHP? 🟥 or 🟩 ?,7393,@kashyapit,"PHP is a green flag. Yahoo was using PHP, if Yahoo would have bought Google. The present might be different.",2
-61koDfqjAfQ,Only knowing PHP? 🟥 or 🟩 ?,7393,@syleishere,"Actually it was perl, then PHP, and now Python. At least for anyone that can walk comfortably around FreeBSD, Linux, Cisco systems these days. 
+L1QlVr686Bg,What actually prints to the console and why? Go!,5356,@GoogleDevelopers,"Answer: The output is: [1, NaN, NaN]
+Here’s why: Array.map passes three arguments to the callback: the current element, the index, and the whole array. parseInt takes two arguments: the string to parse and the radix (number base). When you write [""1"", ""2"", ""3""].map(parseInt), the index gets passed as the radix.
+Fix: Use an arrow function so you only pass the string.
+const result = [""1"", ""2"", ""3""].map(str => parseInt(str));
+or even better, use Number:
+const result = [""1"", ""2"", ""3""].map(Number); // [1, 2, 3]",1
+L1QlVr686Bg,What actually prints to the console and why? Go!,5356,@GoogleDevelopers,Hint: Remember that Array.map passes more than one argument into the callback. How many parameters does parseInt expect?,3
+L1QlVr686Bg,What actually prints to the console and why? Go!,5356,@CodeCecil,"TLDR; [""1"", ""2"", ""3""].map(parseInt) == [""1"", ""2"", ""3""].map((num, idx) => parseInt(num, idx));
 
-For development it's still mostly python with fastapi now for server end. The client end is where things got really screwed just to make a pretty interface, now you have java, kotlin, swift, flutter, KMP, hell even c++ and unity for games, all this while making your API calls back to your original python lol. 
-
-If someone would make a native python framework to interact directly with JNI etc, developers could spend more time on productive things like AI instead of frameworks :) A red flag would be a language with no native support for FreeBSD, as that's just going to upset way to many CEOs at companies.",0
-61koDfqjAfQ,Only knowing PHP? 🟥 or 🟩 ?,7393,@kyliefire5008,"PHP, Green flag!",1
-61koDfqjAfQ,Only knowing PHP? 🟥 or 🟩 ?,7393,@chrisspencer6502,If you’re looking for a php developer,0
-61koDfqjAfQ,Only knowing PHP? 🟥 or 🟩 ?,7393,@al-gassimsharafaddin7289,Enjoyed this! Thanks! :),0
-61koDfqjAfQ,Only knowing PHP? 🟥 or 🟩 ?,7393,@sssutube1,Keep on bringing such content,0
-61koDfqjAfQ,Only knowing PHP? 🟥 or 🟩 ?,7393,@tech-ben,PHP => 🚩,0
-OU9-7Vjkbiw,Timelines meet reality 👨‍💻,7475,@MarkH-v1c,This is like an Alberta Tech video that had to be approved by 9 different teams of lawyers and brand communication guideline consultants 😂,2
-OU9-7Vjkbiw,Timelines meet reality 👨‍💻,7475,@АлександрЕсин-л2щ,Привет Гугал Разработчики ❤🎉 Вы Супер ❤🎉 Спосибо Вам огромное Гугал Разработчики за Джемени ИИ ❤🎉,0
-OU9-7Vjkbiw,Timelines meet reality 👨‍💻,7475,@carlosmurillo941,"No matter the day, the IA can do that... -_-",0
-OU9-7Vjkbiw,Timelines meet reality 👨‍💻,7475,@Fari.fari222,Ok,0
-OU9-7Vjkbiw,Timelines meet reality 👨‍💻,7475,@helonew6195,"Who is man, who is woman? Such a confusing world.",1
-OU9-7Vjkbiw,Timelines meet reality 👨‍💻,7475,@Gyanaranjanhati,"Make an computer,
-Adjust Speaker,,
-.
-.
-.
-.                    J.R",0
-HvKALwVC9JM,Why does TypeScript let you assign a RobotDog to a variable typed as Dog? Go!,11608,@GoogleDevelopers,"Answer: TypeScript uses structural typing, so if two types have the same shape, assignments between them are allowed, even if one class doesn’t explicitly extend the other. That’s why RobotDog works as a Dog: both have a bark() method. But when Dog includes a private (or protected) field, TypeScript switches to nominal compatibility for those members. In other words, only subclasses that share the same declaration of that private field are considered valid. Since RobotDog doesn’t share Dog’s private state, the assignment fails.",0
-HvKALwVC9JM,Why does TypeScript let you assign a RobotDog to a variable typed as Dog? Go!,11608,@Butcheren0,"If it walks like a duck and quacks like a duck, then for my purposes, it's a duck. Hire me now",7
-HvKALwVC9JM,Why does TypeScript let you assign a RobotDog to a variable typed as Dog? Go!,11608,@M3N715,Since there are already sound explanations: Could you please get the indentation correctly? It hurts my eyes.,18
-HvKALwVC9JM,Why does TypeScript let you assign a RobotDog to a variable typed as Dog? Go!,11608,@GoogleDevelopers,"Hint: Think about the difference between structural compatibility and nominal inheritance.
-And pay special attention to how TypeScript treats private or protected members.",4
-HvKALwVC9JM,Why does TypeScript let you assign a RobotDog to a variable typed as Dog? Go!,11608,@brian_glass,"Coz TypeScript determines type compatibility based on the shape or structure of an object, rather than relying on explicit declarations or nominal relationships (like class inheritance in some other languages).",11
-HvKALwVC9JM,Why does TypeScript let you assign a RobotDog to a variable typed as Dog? Go!,11608,@АлександрЕсин-л2щ,"Спасибо большое Гугал Разработчики за Джемени ИИ ❤🎉 Гугал Разработчики, вы супер ❤ Я вас обожаю ❤🎉",0
-HvKALwVC9JM,Why does TypeScript let you assign a RobotDog to a variable typed as Dog? Go!,11608,@siddharth_shankar91,"In this scenario it is because of structural typing and compatibility is determined by factors such as shape of the object , its properties, methods etc and not by class name. However addition of private field to eithr of the class make type script shifts to nominal approach which require actual relatedness....fingers crossed🤞 to see if this checks out correct.",0
-HvKALwVC9JM,Why does TypeScript let you assign a RobotDog to a variable typed as Dog? Go!,11608,@RomainGilles-mf2xh,I think it's due to duck typing,0
-HvKALwVC9JM,Why does TypeScript let you assign a RobotDog to a variable typed as Dog? Go!,11608,@tempxyzzy,"Typescript is somewhat okay, but Javascript needs to be purged ASAP.",2
-HvKALwVC9JM,Why does TypeScript let you assign a RobotDog to a variable typed as Dog? Go!,11608,@EpicVideos2,"Who cares, I can ask gemini 3 and find out in 5 seconds. You automated your own dev teams specialist knowledge away. These videos are redundant.",0
+The radix provided is the index of the string in the array being iterated over. So ""2"" with a radix of 1 is NaN because 2 is not a valid integer in a base 1 number system. ""1"" is valid because the radix is set to 0 which causes parseInt to chose the best radix based on the string's value. Since there is not leading whitespace, sign or anything else, it is defaulted to base 10 so that is why ""1"" -> 1",3
+L1QlVr686Bg,What actually prints to the console and why? Go!,5356,@siddharth_shankar91,This is because when suppose we use .map(parseInt) the parseInt function recieves two arguments for each element first the string to be converted and index of array element to be used as radix parameter in the above. This causes invalid parsing for non decimal bases. Solution may be to use correct way to map strings to numbers.....like .map( Number) etc...,0
+L1QlVr686Bg,What actually prints to the console and why? Go!,5356,@KhanhPham-ix1pu,Did anyone else catch how parseInt behaves unexpectedly in TypeScript due to its base argument? Worth noting that this can lead to some tricky bugs. I wonder if using Number() instead of parseInt would help maintain the expected behavior. Thoughts?,0
+L1QlVr686Bg,What actually prints to the console and why? Go!,5356,@danieljorgensen8979,You’re sending the wrong base to ParseInt 😉,2
+L1QlVr686Bg,What actually prints to the console and why? Go!,5356,@abhishekdesai5355,"Well, parseInt Take 2nd argument as base value which we are passing as index of the number.
+So, every ans would be base of 0, 1 2.",0
+L1QlVr686Bg,What actually prints to the console and why? Go!,5356,@massnagaraju,Super❤❤❤,0
+L1QlVr686Bg,What actually prints to the console and why? Go!,5356,@АлександрЕсин-л2щ,Hi Google's ❤🎉👋,0
+L1QlVr686Bg,What actually prints to the console and why? Go!,5356,@akshayV701,"It supposed to work unfortunately it output 1, NaN, NaN .  Problem here it Passes index as radix to parse int.
+Solution:
+const results = [""1"", ""2"", ""3""].map(x => parseInt(x));",1
