@@ -72,16 +72,15 @@ def get_top_comments(video_id, max_results=MAX_COMMENTS):
         for item in response.get("items", []):
             snippet = item["snippet"]["topLevelComment"]["snippet"]
             comments.append({
-                "author": snippet["authorDisplayName"],
                 "text": snippet["textDisplay"],
                 "likes": snippet.get("likeCount", 0)
             })
         if not comments:
-            comments = [{"author": "", "text": "", "likes": 0}]
+            comments = [{"text": "", "likes": 0}]
         return comments
     except Exception as e:
         print(f"Error fetching comments for {video_id}: {e}")
-        return [{"author": "", "text": "", "likes": 0}]
+        return [{"text": "", "likes": 0}]
 
 all_rows = []
 for ch in channel_data:
@@ -106,7 +105,6 @@ for ch in channel_data:
                 video["video_id"],
                 video["title"],
                 video["views"],
-                comment["author"],
                 comment["text"],
                 comment["likes"]
             ])
@@ -121,7 +119,6 @@ header = [
     "video_id",
     "video_title",
     "video_views",
-    "comment_author",
     "comment_text",
     "comment_likes"
 ]
