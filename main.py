@@ -1,7 +1,6 @@
 import csv
 import json
 import os
-from concurrent.futures import ThreadPoolExecutor
 
 from youtube_api import (
     get_recent_videos,
@@ -19,16 +18,16 @@ from timing_utils import (
 CHANNEL_JSON = "channels.json"
 COMMENTS_CSV = "youtube_data.csv"
 CHANNELS_CSV = "channels_data.csv"
-MAX_WORKERS = 5
 
 def process_channel(ch, cache):
-    """Fetch recent videos and comments for a single channel."""
+    """Fetch recent videos and comments for a single channel without duplicates."""
     channel_id = ch["id"]
     subs = ch.get("subs", 0)
     total_views = ch.get("views", 0)
     video_count = ch.get("videos", 0)
     cluster = ch.get("cluster", -1)
     last_checked = cache.get(channel_id, {}).get("last_checked")
+    already_seen_videos = set(cache.get(channel_id, {}).get("video_ids", []))
 
     if not needs_update(channel_id, cache):
         print(f"Skipping {channel_id} (checked recently)")
@@ -38,14 +37,21 @@ def process_channel(ch, cache):
     video_ids = get_recent_videos(channel_id, last_checked)
     if not video_ids:
         print(f"No new videos for {channel_id}")
-        update_cache_entry(cache, channel_id, [])
+        update_cache_entry(cache, channel_id, [])  # still update last_checked
         return []
 
-    video_stats = get_video_stats(video_ids)
+    # Filter out videos we already processed
+    new_video_ids = [v for v in video_ids if v not in already_seen_videos]
+    if not new_video_ids:
+        print(f"All videos for {channel_id} already processed.")
+        update_cache_entry(cache, channel_id, list(already_seen_videos))
+        return []
+
+    video_stats = get_video_stats(new_video_ids)
     all_rows = []
 
     for video in video_stats:
-        comments = get_top_comments(video["video_id"]) if video["commentCount"] > 0 else [{"text": "", "likes": 0}]
+        comments = get_top_comments(video["video_id"]) if video.get("commentCount", 0) > 0 else [{"text": "", "likes": 0}]
         for comment in comments:
             all_rows.append([
                 channel_id,
@@ -54,40 +60,14 @@ def process_channel(ch, cache):
                 video_count,
                 cluster,
                 video["video_id"],
-                video["title"],
-                video["views"],
-                comment["text"],
-                comment["likes"]
+                video.get("title", ""),
+                video.get("views", 0),
+                comment.get("text", ""),
+                comment.get("likes", 0)
             ])
 
-    update_cache_entry(cache, channel_id, [v["video_id"] for v in video_stats])
+    update_cache_entry(cache, channel_id, list(already_seen_videos | set(new_video_ids)))
     return all_rows
-
-def main():
-    # Load channel data
-    with open(CHANNEL_JSON, "r", encoding="utf-8") as f:
-        channel_data = json.load(f)
-
-    # Load or create cache
-    cache = load_cache()
-
-    all_rows = []
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        results = executor.map(lambda c: process_channel(c, cache), channel_data)
-        for res in results:
-            all_rows.extend(res)
-
-    # Write or append to comment-level CSV
-    if all_rows:
-        write_comments_csv(all_rows)
-        print(f"Saved {len(all_rows)} comment rows.")
-    else:
-        print("No new comment data to save.")
-
-    # Write channel summary + cache
-    write_channel_summary_csv(cache, CHANNELS_CSV)
-    save_cache(cache)
-    print("Update complete.")
 
 def write_comments_csv(all_rows):
     header = [
@@ -108,6 +88,28 @@ def write_comments_csv(all_rows):
         if not file_exists or os.stat(COMMENTS_CSV).st_size == 0:
             writer.writerow(header)
         writer.writerows(all_rows)
+
+def main():
+    with open(CHANNEL_JSON, "r", encoding="utf-8") as f:
+        channel_data = json.load(f)
+
+    cache = load_cache()
+
+    all_rows = []
+    for ch in channel_data:
+        rows = process_channel(ch, cache)
+        if rows:
+            all_rows.extend(rows)
+
+    if all_rows:
+        write_comments_csv(all_rows)
+        print(f"Saved {len(all_rows)} comment rows.")
+    else:
+        print("No new comment data to save.")
+
+    write_channel_summary_csv(cache, CHANNELS_CSV)
+    save_cache(cache)
+    print("Update complete.")
 
 if __name__ == "__main__":
     main()

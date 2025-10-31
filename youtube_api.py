@@ -2,7 +2,7 @@ import time
 from googleapiclient.discovery import build
 from itertools import islice
 
-API_KEY = "AIzaSyDl1kCTrO4heRfOZDI5UQ6qNm-oFRPWItof"
+API_KEY = "AIzaSyDl1kCTrO4heRfOZDI5UQ6qNm-oFRPWIto"
 BATCH_SIZE = 50
 MAX_VIDEOS = 5
 MAX_COMMENTS = 10
