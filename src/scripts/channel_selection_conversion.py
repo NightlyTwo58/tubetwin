@@ -2,7 +2,7 @@ import pandas as pd
 import sys
 import os
 
-csv_file = "../../data/input/channels.csv"
+csv_file = "../../data/archive/channels.csv"
 json_file = os.path.splitext(csv_file)[0] + ".json"
 
 df = pd.read_csv(csv_file)
