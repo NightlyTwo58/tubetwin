@@ -2,8 +2,7 @@ import pandas as pd
 import sys
 import os
 
-# change this or pass via command line
-csv_file = "channels.csv"
+csv_file = "../../data/input/channels.csv"
 json_file = os.path.splitext(csv_file)[0] + ".json"
 
 df = pd.read_csv(csv_file)

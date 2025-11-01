@@ -3,16 +3,15 @@ import json
 import os
 
 UPDATE_INTERVAL_HOURS = 24
-CACHE_FILE = "cache.json"
 
-def load_cache():
-    if os.path.exists(CACHE_FILE):
-        with open(CACHE_FILE, "r", encoding="utf-8") as f:
+def load_cache(filename):
+    if os.path.exists(filename):
+        with open(filename, "r", encoding="utf-8") as f:
             return json.load(f)
     return {}
 
-def save_cache(cache):
-    with open(CACHE_FILE, "w", encoding="utf-8") as f:
+def save_cache(cache, filename):
+    with open(filename, "w", encoding="utf-8") as f:
         json.dump(cache, f, indent=2)
 
 def needs_update(channel_id, cache):
