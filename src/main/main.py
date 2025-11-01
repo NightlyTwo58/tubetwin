@@ -15,9 +15,12 @@ from timing_utils import (
     write_channel_summary_csv
 )
 
-CHANNEL_JSON = "channels.json"
-COMMENTS_CSV = "youtube_data.csv"
-CHANNELS_CSV = "channels_data.csv"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "...")
+CHANNEL_JSON = os.path.join(DATA_DIR, "data/input/channels.json")
+COMMENTS_CSV = os.path.join(DATA_DIR, "data/output/youtube_data.csv")
+CHANNELS_CSV = os.path.join(DATA_DIR, "data/output/channels_data.csv")
+CACHE_JSON =  os.path.join(DATA_DIR, "data/input/cache.json")
 
 def process_channel(ch, cache):
     """Fetch recent videos and comments for a single channel without duplicates."""
@@ -93,7 +96,7 @@ def main():
     with open(CHANNEL_JSON, "r", encoding="utf-8") as f:
         channel_data = json.load(f)
 
-    cache = load_cache()
+    cache = load_cache(CACHE_JSON)
 
     all_rows = []
     for ch in channel_data:
@@ -108,7 +111,7 @@ def main():
         print("No new comment data to save.")
 
     write_channel_summary_csv(cache, CHANNELS_CSV)
-    save_cache(cache)
+    save_cache(cache, CACHE_JSON)
     print("Update complete.")
 
 if __name__ == "__main__":
