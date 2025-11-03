@@ -1,21 +1,11 @@
 import time
 from googleapiclient.discovery import build
-from itertools import islice
 
 API_KEY = "AIzaSyDl1kCTrO4heRfOZDI5UQ6qNm-oFRPWIto"
-BATCH_SIZE = 50
-MAX_VIDEOS = 5
+MAX_VIDEOS = 50
 MAX_COMMENTS = 10
 
 youtube = build("youtube", "v3", developerKey=API_KEY)
-
-def chunked(iterable, size):
-    it = iter(iterable)
-    while True:
-        chunk = list(islice(it, size))
-        if not chunk:
-            return
-        yield chunk
 
 def safe_execute(request, retries=5):
     """Execute API requests with retries for quota/rate-limit handling."""
@@ -33,6 +23,7 @@ def safe_execute(request, retries=5):
     return {}
 
 def get_recent_videos(channel_id, last_checked=None, max_results=MAX_VIDEOS):
+    """Fetch videos published after last_checked (ISO string)."""
     params = {
         "part": "id",
         "channelId": channel_id,
@@ -47,8 +38,10 @@ def get_recent_videos(channel_id, last_checked=None, max_results=MAX_VIDEOS):
     return [item["id"]["videoId"] for item in response.get("items", [])]
 
 def get_video_stats(video_ids):
+    """Fetch video snippet and statistics; YouTube API allows up to 50 ids per request."""
     stats = []
-    for batch in chunked(video_ids, BATCH_SIZE):
+    for i in range(0, len(video_ids), 50):
+        batch = video_ids[i:i + 50]
         response = safe_execute(
             youtube.videos().list(
                 part="snippet,statistics",
@@ -61,11 +54,13 @@ def get_video_stats(video_ids):
                 "video_id": item["id"],
                 "title": item["snippet"]["title"],
                 "views": int(s.get("viewCount", 0)),
-                "commentCount": int(s.get("commentCount", 0))
+                "commentCount": int(s.get("commentCount", 0)),
+                "publishedAt": item["snippet"]["publishedAt"]
             })
     return stats
 
 def get_top_comments(video_id, max_results=MAX_COMMENTS):
+    """Fetch top-level comments, ordered by relevance, plain text only."""
     response = safe_execute(
         youtube.commentThreads().list(
             part="snippet",
