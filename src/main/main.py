@@ -15,58 +15,98 @@ CHANNELS_CSV = os.path.join(DATA_DIR, "output", "channels_data.csv")
 
 START_DATE = "2016-01-01T00:00:00Z"
 
-def process_channel(ch, cache):
+def process_channel(ch, cache, step_days=1):
+    """
+    Crawls YouTube data day-by-day for a single channel.
+    If a request fails (e.g., quota exceeded), discards all results from the current day
+    and rolls back to retry that date on the next run.
+    """
+
     channel_id = ch["id"]
     subs = ch.get("subs", 0)
     total_views = ch.get("views", 0)
     video_count = ch.get("videos", 0)
     cluster = ch.get("cluster", -1)
 
-    last_checked = cache.get(channel_id, {}).get("last_checked", START_DATE)
+    # Initialize last_checked if not in cache
+    last_checked_str = cache.get(channel_id, {}).get("last_checked", START_DATE)
+    last_checked = dt.datetime.fromisoformat(last_checked_str.replace("Z", "+00:00"))
+    now = dt.datetime.utcnow()
+
     already_seen_videos = set(cache.get(channel_id, {}).get("video_ids", []))
-
-    print(f"Updating {channel_id}...")
-    video_ids = get_recent_videos(channel_id, last_checked)
-    if not video_ids:
-        print(f"No new videos for {channel_id}")
-        return [], (channel_id, subs, total_views, video_count, cluster), already_seen_videos, last_checked
-
-    new_video_ids = [v for v in video_ids if v not in already_seen_videos]
-    if not new_video_ids:
-        print(f"All videos for {channel_id} already processed.")
-        return [], (channel_id, subs, total_views, video_count, cluster), already_seen_videos, last_checked
-
-    video_stats = get_video_stats(new_video_ids)
     all_rows = []
 
-    # track the latest publishedAt across processed videos
-    max_date = last_checked
-    for video in video_stats:
-        pub = video["publishedAt"]
-        if pub > max_date:
-            max_date = pub
+    print(f"Crawling {channel_id} starting from {last_checked.date()}...")
 
-        comments = get_top_comments(video["video_id"]) if video.get("commentCount", 0) > 0 else [{"text": "", "likes": 0}]
-        for comment in comments:
-            all_rows.append([
+    # Outer loop: day-by-day (or specified step_days)
+    while last_checked < now:
+        period_end = last_checked + dt.timedelta(days=step_days)
+        if period_end > now:
+            period_end = now
+
+        print(f"  Fetching videos from {last_checked.date()} to {period_end.date()}...")
+
+        try:
+            # Query only within this specific window
+            video_ids = get_recent_videos(
                 channel_id,
-                subs,
-                total_views,
-                video_count,
-                cluster,
-                video["video_id"],
-                video.get("title", ""),
-                video.get("views", 0),
-                comment.get("text", ""),
-                comment.get("likes", 0)
-            ])
+                published_after=last_checked.isoformat() + "Z",
+                published_before=period_end.isoformat() + "Z",
+            )
 
-    # update cache using latest actual video date
-    update_cache_entry(cache, channel_id, already_seen_videos | set(new_video_ids), max_date)
-    return all_rows, (channel_id, subs, total_views, video_count, cluster), already_seen_videos | set(new_video_ids), max_date
+            if not video_ids:
+                last_checked = period_end
+                continue
+
+            new_video_ids = [v for v in video_ids if v not in already_seen_videos]
+            if not new_video_ids:
+                last_checked = period_end
+                continue
+
+            # Inner loop: gather stats and comments
+            video_stats = get_video_stats(new_video_ids)
+            for video in video_stats:
+                comments = (
+                    get_top_comments(video["video_id"])
+                    if video.get("commentCount", 0) > 0
+                    else [{"text": "", "likes": 0}]
+                )
+                for comment in comments:
+                    all_rows.append([
+                        period_end.date().isoformat(),
+                        channel_id,
+                        subs,
+                        total_views,
+                        video_count,
+                        cluster,
+                        video["video_id"],
+                        video.get("title", ""),
+                        video.get("views", 0),
+                        comment.get("text", ""),
+                        comment.get("likes", 0)
+                    ])
+
+            # Update progress only after a full successful day
+            already_seen_videos |= set(new_video_ids)
+            update_cache_entry(cache, channel_id, already_seen_videos, period_end.isoformat() + "Z")
+
+            # Move to next time period
+            last_checked = period_end
+
+        except Exception as e:
+            # On failure (e.g., quota exceeded), discard current day’s data
+            print(f"  Error on {last_checked.date()} for {channel_id}: {e}")
+            print("  Discarding results from this day and rolling back progress.")
+            # Save cache only up to previous successful date
+            update_cache_entry(cache, channel_id, already_seen_videos, last_checked.isoformat() + "Z")
+            return all_rows, (channel_id, subs, total_views, video_count, cluster), already_seen_videos, last_checked.isoformat() + "Z"
+
+    print(f"Finished crawling {channel_id} up to {now.date()}")
+    return all_rows, (channel_id, subs, total_views, video_count, cluster), already_seen_videos, now.isoformat() + "Z"
+
 
 def write_comments_csv(all_rows):
-    header = ["channel_id","channel_subs","channel_total_views","channel_video_count","channel_cluster",
+    header = ["date","channel_id","channel_subs","channel_total_views","channel_video_count","channel_cluster",
               "video_id","video_title","video_views","comment_text","comment_likes"]
     file_exists = os.path.exists(COMMENTS_CSV)
     with open(COMMENTS_CSV, "a", newline="", encoding="utf-8") as f:
