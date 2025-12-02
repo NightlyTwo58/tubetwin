@@ -44,20 +44,45 @@ def get_video_stats(video_ids):
         batch = video_ids[i:i + 50]
         response = safe_execute(
             youtube.videos().list(
-                part="snippet,statistics",
+                part="snippet,statistics,topicDetails",
                 id=",".join(batch)
             )
         )
         for item in response.get("items", []):
             s = item.get("statistics", {})
+            snippet = item.get("snippet", {})
+            topics = item.get("topicDetails", {}).get("topicCategories", [])
             stats.append({
                 "video_id": item["id"],
-                "title": item["snippet"]["title"],
+                "title": snippet.get("title", ""),
+                "description": snippet.get("description", ""),
                 "views": int(s.get("viewCount", 0)),
                 "commentCount": int(s.get("commentCount", 0)),
-                "publishedAt": item["snippet"]["publishedAt"]
+                "publishedAt": snippet.get("publishedAt"),
+                "topics": topics
             })
     return stats
+
+def get_channel_details(channel_ids):
+    """Fetch snippet info for channels (title, description, topicDetails)."""
+    details = {}
+    for i in range(0, len(channel_ids), 50):
+        batch = channel_ids[i:i + 50]
+        response = safe_execute(
+            youtube.channels().list(
+                part="snippet,topicDetails",
+                id=",".join(batch)
+            )
+        )
+        for item in response.get("items", []):
+            snippet = item.get("snippet", {})
+            topic = item.get("topicDetails", {}).get("topicCategories", [])
+            details[item["id"]] = {
+                "title": snippet.get("title", ""),
+                "description": snippet.get("description", ""),
+                "topics": topic
+            }
+    return details
 
 def get_top_comments(video_id, max_results=MAX_COMMENTS):
     """Fetch top-level comments, ordered by relevance, plain text only."""

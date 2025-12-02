@@ -2,7 +2,7 @@ import csv
 import json
 import os
 import datetime as dt
-from youtube_api import get_recent_videos, get_video_stats, get_top_comments
+from youtube_api import get_recent_videos, get_video_stats, get_top_comments, get_channel_details
 from timing_utils import load_cache, save_cache, update_cache_entry
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -22,11 +22,18 @@ def process_channel(ch, cache, step_days=1):
     and rolls back to retry that date on the next run.
     """
 
+    # TODO: channel topic, channel descripiton, video topic, video description
+    # TODO: make this into an array here and just pass the array later
     channel_id = ch["id"]
     subs = ch.get("subs", 0)
     total_views = ch.get("views", 0)
     video_count = ch.get("videos", 0)
     cluster = ch.get("cluster", -1)
+
+    channel_info = get_channel_details([channel_id]).get(channel_id, {})
+    channel_title = channel_info.get("title", "")
+    channel_desc = channel_info.get("description", "")
+    channel_topics = ", ".join(channel_info.get("topics", []))
 
     # Initialize last_checked if not in cache
     last_checked_str = cache.get(channel_id, {}).get("last_checked", START_DATE)
@@ -71,16 +78,23 @@ def process_channel(ch, cache, step_days=1):
                     if video.get("commentCount", 0) > 0
                     else [{"text": "", "likes": 0}]
                 )
+
+                # TODO: include display name
                 for comment in comments:
                     all_rows.append([
                         period_end.date().isoformat(),
                         channel_id,
+                        channel_title,
+                        channel_desc,
+                        channel_topics,
                         subs,
                         total_views,
                         video_count,
                         cluster,
                         video["video_id"],
                         video.get("title", ""),
+                        video.get("description", ""),
+                        ", ".join(video.get("topics", [])),
                         video.get("views", 0),
                         comment.get("text", ""),
                         comment.get("likes", 0)
@@ -106,8 +120,10 @@ def process_channel(ch, cache, step_days=1):
 
 
 def write_comments_csv(all_rows):
-    header = ["date","channel_id","channel_subs","channel_total_views","channel_video_count","channel_cluster",
-              "video_id","video_title","video_views","comment_text","comment_likes"]
+    header = ["date", "channel_id", "channel_title", "channel_description", "channel_topics",
+              "channel_subs", "channel_total_views", "channel_video_count", "channel_cluster",
+              "video_id", "video_title", "video_description", "video_topics",
+              "video_views", "comment_text", "comment_likes"]
     file_exists = os.path.exists(COMMENTS_CSV)
     with open(COMMENTS_CSV, "a", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
