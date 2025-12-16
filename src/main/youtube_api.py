@@ -1,22 +1,20 @@
 from googleapiclient.discovery import build
 
-API_KEY = "AIzaSyBq9R-lUGNH3niJiJHRrcUihKqRP-40V7c"
+API_KEY = "AIzaSyDl1kCTrO4heRfOZDI5UQ6qNm-oFRPWIto"
 MAX_VIDEOS = 50
 MAX_COMMENTS = 10
 
 youtube = build("youtube", "v3", developerKey=API_KEY)
 
 def safe_execute(func):
-    """Execute a YouTube API call safely; return None if quota/rate limit hit."""
     try:
         return func()
     except Exception as e:
-        msg = str(e).lower()
-        if "quota" in msg or "ratelimit" in msg:
-            print("[WARN] Quota hit — returning None")
+        reason = str(e).lower()
+        if "quota" in reason or "ratelimit" in reason:
+            print("[WARN] Quota exhausted")
             return None
-        print(f"[ERROR] API call failed: {e}")
-        return None
+        raise
 
 def get_recent_videos(channel_id, published_after=None, published_before=None, max_results=MAX_VIDEOS):
     """Fetch video IDs for a channel within a date range."""
@@ -33,8 +31,8 @@ def get_recent_videos(channel_id, published_after=None, published_before=None, m
         params["publishedBefore"] = published_before
 
     response = safe_execute(lambda: youtube.search().list(**params).execute())
-    if not response:
-        return []
+    if response is None:
+        return None
     return [item["id"]["videoId"] for item in response.get("items", [])]
 
 def get_video_stats(video_ids):
@@ -46,8 +44,8 @@ def get_video_stats(video_ids):
             part="snippet,statistics,topicDetails",
             id=",".join(batch)
         ).execute())
-        if not response:
-            continue
+        if response is None:
+            return None
 
         for item in response.get("items", []):
             snippet = item.get("snippet", {})
@@ -73,8 +71,8 @@ def get_channel_details(channel_ids):
             part="snippet,topicDetails",
             id=",".join(batch)
         ).execute())
-        if not response:
-            continue
+        if response is None:
+            return None
 
         for item in response.get("items", []):
             snippet = item.get("snippet", {})
